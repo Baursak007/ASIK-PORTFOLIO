@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asik // Веб-разработчик & Автоматизация Ботов (Астана)</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: {
+                            DEFAULT: '#080a0f',
+                            surface: '#0d111a',
+                            card: '#131926',
+                            hover: '#1a2234',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            'border-active': 'rgba(0, 242, 254, 0.4)'
+                        },
+                        titanium: {
+                            100: '#ffffff',
+                            200: '#f8fafc',
+                            300: '#e2e8f0',
+                            400: '#94a3b8',
+                            500: '#64748b'
+                        },
+                        accent: {
+                            cyan: '#00f2fe',
+                            blue: '#38bdf8',
+                            emerald: '#10b981',
+                            whatsapp: '#25D366',
+                            telegram: '#229ED9'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 5s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-6px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* ==============================================================
+           CUSTOM INTERACTIVE DUAL CURSOR STYLES (VERCEL / LINEAR STYLE)
+           ============================================================== */
+        @media (hover: hover) and (pointer: fine) {
+            html, body, a, button, input, textarea, select, label {
+                cursor: none !important;
+            }
+        }
+
+        /* Inner Hardware Precision Core Dot */
+        .custom-cursor-dot {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 6px;
+            background-color: #00f2fe;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s ease, transform 0.15s ease-out, background-color 0.2s ease;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
+        }
+
+        /* Outer Smooth Lagging Ring (144Hz Lerp) */
+        .custom-cursor-ring {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            background: rgba(0, 242, 254, 0.02);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99998;
+            transform: translate(-50%, -50%);
+            transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                        height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-color 0.25s ease,
+                        background-color 0.25s ease,
+                        border-radius 0.25s ease,
+                        opacity 0.2s ease;
+        }
+
+        /* Hover Interactive State */
+        body.cursor-is-hovering .custom-cursor-ring {
+            width: 52px;
+            height: 52px;
+            border-color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 242, 254, 0.08);
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.25);
+        }
+
+        body.cursor-is-hovering .custom-cursor-dot {
+            transform: translate(-50%, -50%) scale(1.5);
+            background-color: #ffffff;
+            box-shadow: 0 0 14px rgba(255, 255, 255, 0.9);
+        }
+
+        /* Press State */
+        body.cursor-is-pressed .custom-cursor-ring {
+            width: 28px;
+            height: 28px;
+            border-color: #00f2fe;
+            background: rgba(0, 242, 254, 0.2);
+        }
+
+        body.cursor-is-pressed .custom-cursor-dot {
+            transform: translate(-50%, -50%) scale(0.7);
+        }
+
+        /* Target Area State */
+        body.cursor-is-target .custom-cursor-ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 1px dashed rgba(0, 242, 254, 0.8);
+            background: rgba(16, 185, 129, 0.05);
+            animation: ringSpin 12s linear infinite;
+        }
+
+        body.cursor-is-target .custom-cursor-dot {
+            background-color: #10b981;
+            box-shadow: 0 0 12px #10b981;
+        }
+
+        @keyframes ringSpin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        body.cursor-hidden .custom-cursor-ring,
+        body.cursor-hidden .custom-cursor-dot {
+            opacity: 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a2234;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f2fe;
+        }
+
+        /* Matte Minimalist Card */
+        .matte-card {
+            background: rgba(19, 25, 38, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .matte-card:hover {
+            border-color: rgba(0, 242, 254, 0.35);
+            box-shadow: 0 20px 40px -15px rgba(0, 242, 254, 0.08);
+        }
+
+        /* Spotlight FX */
+        .spotlight-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .spotlight-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0, 242, 254, 0.06), transparent 40%);
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .spotlight-card:hover::before {
+            opacity: 1;
+        }
+
+        .bg-grid {
+            background-size: 36px 36px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        .gradient-cyan {
+            background: linear-gradient(135deg, #ffffff 0%, #00f2fe 50%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-emerald {
+            background: linear-gradient(135deg, #ffffff 0%, #10b981 50%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-obsidian text-titanium-300 font-sans antialiased selection:bg-accent-cyan selection:text-obsidian overflow-x-hidden">
+
+    <!-- CUSTOM INTERACTIVE DUAL CURSOR -->
+    <div id="cursorDot" class="custom-cursor-dot hidden lg:block"></div>
+    <div id="cursorRing" class="custom-cursor-ring hidden lg:block"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 py-4 transition-all duration-300" id="mainHeader">
+        <div class="max-w-7xl mx-auto flex items-center justify-between matte-card rounded-full px-6 py-3 border border-obsidian-border shadow-2xl">
+            
+            <!-- Brand & Dev Identity -->
+            <a href="#hero" class="flex items-center gap-3 group cursor-pointer">
+                <div class="w-9 h-9 rounded-full bg-obsidian-hover border border-obsidian-border flex items-center justify-center group-hover:border-accent-cyan transition-colors">
+                    <i data-lucide="terminal" class="w-4 h-4 text-accent-cyan"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-xs tracking-wider text-titanium-100 uppercase group-hover:text-accent-cyan transition-colors">ASIK // WEB & BOTS</span>
+                    <span class="font-mono text-[9px] text-titanium-500 tracking-widest uppercase">Астана • Сайты & Автоматизация</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-7 font-mono text-[11px] tracking-widest uppercase text-titanium-400">
+                <a href="#about" class="hover:text-titanium-100 transition-colors">Кто я</a>
+                <a href="#cases" class="hover:text-titanium-100 transition-colors">Работы</a>
+                <a href="#simulator" class="hover:text-accent-cyan transition-colors">Демо Бота</a>
+                <a href="#calculator" class="hover:text-accent-emerald transition-colors">Цены</a>
+                <a href="https://github.com/baursak007" target="_blank" class="hover:text-titanium-100 transition-colors flex items-center gap-1.5">
+                    <i data-lucide="github" class="w-3.5 h-3.5"></i>
+                    <span>GitHub</span>
+                </a>
+            </nav>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-3">
+                <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Беру новые заказы</span>
+                </div>
+
+                <!-- Web Audio Click FX Toggle -->
+                <button id="soundToggleBtn" title="Звуковой отклик" class="w-8 h-8 rounded-full bg-obsidian-card border border-obsidian-border flex items-center justify-center text-titanium-400 hover:text-titanium-100 hover:border-accent-cyan transition-all">
+                    <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                </button>
+
+                <!-- Direct Telegram CTA -->
+                <a href="https://t.me/Auramonster" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-cyan text-obsidian font-bold text-xs uppercase tracking-wider hover:bg-titanium-100 transition-all transform hover:-translate-y-0.5">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                    <span>@Auramonster</span>
+                </a>
+
+                <!-- Mobile Navigation Toggle -->
+                <button id="mobileMenuBtn" class="md:hidden text-titanium-300 hover:text-white p-2">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileDrawer" class="hidden md:hidden matte-card mt-3 rounded-2xl p-6 flex flex-col gap-4 text-center text-xs font-mono tracking-widest uppercase border border-obsidian-border">
+            <a href="#about" class="py-2 text-titanium-300 hover:text-white mobile-link">Кто я</a>
+            <a href="#cases" class="py-2 text-titanium-300 hover:text-white mobile-link">Работы</a>
+            <a href="#simulator" class="py-2 text-accent-cyan font-bold mobile-link">Демо Бота</a>
+            <a href="#calculator" class="py-2 text-accent-emerald font-bold mobile-link">Калькулятор Цен</a>
+            <a href="https://github.com/baursak007" target="_blank" class="py-2 text-titanium-300 hover:text-white mobile-link flex items-center justify-center gap-2">
+                <i data-lucide="github" class="w-4 h-4"></i>
+                <span>GitHub (baursak007)</span>
+            </a>
+            <a href="https://t.me/Auramonster" target="_blank" class="py-2 text-accent-cyan font-bold mobile-link flex items-center justify-center gap-2">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Написать в Telegram</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION WITH 3D WEBGL NODE BACKGROUND -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden bg-grid">
+        
+        <!-- Three.js 3D Interactive Canvas -->
+        <canvas id="webglCanvas" class="absolute inset-0 w-full h-full z-0 opacity-90 cursor-target-area"></canvas>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 max-w-6xl mx-auto px-6 text-center flex flex-col items-center">
+            
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full matte-card border border-accent-cyan/30 mb-8 text-xs font-mono text-titanium-200 tracking-widest uppercase animate-float">
+                <span class="w-2 h-2 rounded-full bg-accent-cyan animate-pulse"></span>
+                <span>Здарова, я Asik 👋 • Делаю сайты и ботов в Астане</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.08] mb-6 max-w-5xl">
+                Быстрые <span class="gradient-cyan">веб-сайты</span> и умные <span class="gradient-emerald">Telegram / WA боты</span>
+            </h1>
+
+            <p class="text-base sm:text-xl text-titanium-400 max-w-3xl mb-10 font-normal leading-relaxed">
+                Делаю конверсионные сайты и автоматизирую продажи в мессенджерах. Без раздутого агентского бреда, бесконечных созвонов и лишних переплат.
+            </p>
+
+            <!-- Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-4 mb-16">
+                <a href="https://t.me/Auramonster" target="_blank" class="px-8 py-4 rounded-full bg-accent-cyan text-obsidian font-bold text-xs tracking-wider uppercase hover:bg-titanium-100 transition-all transform hover:-translate-y-0.5 flex items-center gap-3 shadow-lg shadow-accent-cyan/20">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span>Написать в Telegram (@Auramonster)</span>
+                </a>
+                
+                <a href="https://wa.me/77479473841" target="_blank" class="px-8 py-4 rounded-full matte-card text-emerald-400 border border-emerald-500/30 font-mono text-xs tracking-wider uppercase hover:bg-emerald-500/10 transition-all flex items-center gap-3">
+                    <i data-lucide="message-square" class="w-4 h-4 text-accent-whatsapp"></i>
+                    <span>WhatsApp (+77479473841)</span>
+                </a>
+            </div>
+
+            <!-- Price & Service Summary Bar -->
+            <div class="w-full max-w-5xl matte-card rounded-2xl p-4 sm:p-6 border border-obsidian-border grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+                <div class="p-4 rounded-xl bg-obsidian-card border border-obsidian-border spotlight-card">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-titanium-500 mb-1">
+                        <span>ЛЕНДИНГИ</span>
+                        <i data-lucide="layout" class="w-4 h-4 text-accent-cyan"></i>
+                    </div>
+                    <div class="text-2xl font-mono font-bold text-titanium-100">от $150</div>
+                    <div class="text-[11px] font-mono text-titanium-400 mt-1">Быстрые & Продающие</div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-obsidian-card border border-obsidian-border spotlight-card">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-titanium-500 mb-1">
+                        <span>ЧАТ-БОТЫ</span>
+                        <i data-lucide="bot" class="w-4 h-4 text-accent-emerald"></i>
+                    </div>
+                    <div class="text-2xl font-mono font-bold text-accent-emerald">от $100</div>
+                    <div class="text-[11px] font-mono text-titanium-400 mt-1">Telegram & WhatsApp автоворонки</div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-obsidian-card border border-obsidian-border spotlight-card">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-titanium-500 mb-1">
+                        <span>КОМПЛЕКС</span>
+                        <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+                    </div>
+                    <div class="text-2xl font-mono font-bold text-amber-400">от $400</div>
+                    <div class="text-[11px] font-mono text-titanium-400 mt-1">Сайт + Бот + CRM связка</div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-obsidian-card border border-obsidian-border spotlight-card">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-titanium-500 mb-1">
+                        <span>СКОРОСТЬ</span>
+                        <i data-lucide="zap" class="w-4 h-4 text-accent-cyan"></i>
+                    </div>
+                    <div class="text-2xl font-mono font-bold text-titanium-100">3-5 дней</div>
+                    <div class="text-[11px] font-mono text-titanium-400 mt-1">От идеи до готового сайта</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ABOUT ASIK & REAL DEV APPROACH SECTION -->
+    <section id="about" class="py-24 relative z-10 max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <div class="lg:col-span-5 flex justify-center">
+                <div class="relative w-full max-w-md matte-card rounded-3xl p-8 border border-accent-cyan/20 spotlight-card text-center">
+                    <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-tr from-accent-cyan/20 to-obsidian-card border border-accent-cyan/40 flex items-center justify-center text-accent-cyan shadow-xl">
+                        <i data-lucide="code" class="w-12 h-12"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-titanium-100">Asik</h3>
+                    <p class="text-xs font-mono text-accent-cyan mt-1 mb-4">Web & Bot Developer</p>
+                    <p class="text-xs text-titanium-400 leading-relaxed">
+                        📍 г. Астана, Казахстан. Пишу чистый код, собираю функциональные сайты и рабочие автоворонки.
+                    </p>
+                    
+                    <div class="mt-6 pt-6 border-t border-obsidian-border flex justify-center gap-4 text-xs font-mono text-titanium-400">
+                        <a href="https://github.com/baursak007" target="_blank" class="hover:text-accent-cyan flex items-center gap-1.5 transition-colors">
+                            <i data-lucide="github" class="w-4 h-4"></i>
+                            <span>baursak007</span>
+                        </a>
+                        <span>•</span>
+                        <a href="https://t.me/Auramonster" target="_blank" class="hover:text-accent-cyan flex items-center gap-1.5 transition-colors">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span>@Auramonster</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 space-y-6">
+                <span class="font-mono text-xs text-accent-cyan uppercase tracking-widest">// Как я работаю</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-titanium-100 tracking-tight">
+                    Пишу код сам. Общаюсь напрямую. Отвечаю за результат.
+                </h2>
+                
+                <p class="text-titanium-400 text-sm sm:text-base leading-relaxed">
+                    Когда вы заказываете проект у меня, вы не кормите штат менеджеров и аккаунтов. Вы пишете напрямую мне в ТГ или WhatsApp, мы быстро утверждаем ТЗ и я сразу сажусь делать верстку и бота.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div class="p-4 rounded-2xl bg-obsidian-card border border-obsidian-border">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i data-lucide="cpu" class="w-5 h-5 text-accent-cyan"></i>
+                            <h4 class="font-bold text-titanium-100 text-sm">Свежий стек & AI кодинг</h4>
+                        </div>
+                        <p class="text-xs text-titanium-400 leading-relaxed">
+                            Использую современные генеративные инструменты (Vibe coding, AI-ассистенты), чтобы не тратить недели на рутину и отдавать готовый проект в разы быстрее.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-obsidian-card border border-obsidian-border">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-accent-emerald"></i>
+                            <h4 class="font-bold text-titanium-100 text-sm">Прагматичный подход</h4>
+                        </div>
+                        <p class="text-xs text-titanium-400 leading-relaxed">
+                            Сайт должен легко открываться на смартфонах, быстро грузиться и сразу вести клиента к заявке или диалогу в боте.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- REAL PORTFOLIO PROJECTS (ARQA BARBERSHOP & B2B BOT) -->
+    <section id="cases" class="py-24 relative z-10 max-w-7xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <div>
+                <span class="font-mono text-xs text-titanium-500 uppercase tracking-widest">// Мои репозитории и проекты</span>
+                <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-titanium-100 mt-2">
+                    Реальные Работы
+                </h2>
+            </div>
+            
+            <a href="https://github.com/baursak007" target="_blank" class="font-mono text-xs text-accent-cyan hover:text-white flex items-center gap-2 transition-colors">
+                <span>Мой профиль на GitHub (baursak007)</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- CASE 1: ARQA BARBERSHOP -->
+            <div class="case-card matte-card rounded-3xl p-6 sm:p-8 flex flex-col justify-between border border-obsidian-border group">
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan font-mono text-xs flex items-center gap-1.5">
+                            <i data-lucide="github" class="w-3.5 h-3.5"></i>
+                            <span>github.com/baursak007/arqa</span>
+                        </span>
+                        <div class="flex items-center gap-1 text-emerald-400 font-mono text-xs bg-emerald-500/10 px-2.5 py-1 rounded-full">
+                            <i data-lucide="scissors" class="w-3.5 h-3.5"></i>
+                            <span>Барбершоп</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-titanium-100 group-hover:text-accent-cyan transition-colors mb-3">
+                        Arqa — Сайт Барбершопа & Онлайн Запись
+                    </h3>
+                    
+                    <p class="text-titanium-400 text-sm leading-relaxed mb-6">
+                        Лаконичный и убойный мобильный лендинг для барбершопа. Быстрая загрузка, подбор мастера, прайс услуг и удобная форма онлайн-записи.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-3 mb-6 text-xs font-mono">
+                        <div class="p-3 rounded-xl bg-obsidian-card border border-obsidian-border">
+                            <div class="text-titanium-500 text-[10px]">ВЕРСТКА</div>
+                            <div class="text-titanium-100 font-bold text-sm">Mobile First UI</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-obsidian-card border border-obsidian-border">
+                            <div class="text-titanium-500 text-[10px]">ОТКЛИК</div>
+                            <div class="text-accent-emerald font-bold text-sm">Мгновенный</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-obsidian-border flex items-center justify-between">
+                    <div class="flex gap-2 text-xs font-mono text-titanium-500">
+                        <span>HTML5</span> • <span>Tailwind</span> • <span>JS</span>
+                    </div>
+                    <a href="https://github.com/baursak007/arqa" target="_blank" 
+                       class="px-4 py-2 rounded-xl bg-obsidian-card hover:bg-accent-cyan hover:text-obsidian text-titanium-100 text-xs font-bold transition-all flex items-center gap-2">
+                        <span>Репозиторий Arqa</span>
+                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CASE 2: B2B BOT & CRM -->
+            <div class="case-card matte-card rounded-3xl p-6 sm:p-8 flex flex-col justify-between border border-obsidian-border group">
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="px-3 py-1 rounded-full bg-accent-telegram/10 border border-accent-telegram/30 text-accent-telegram font-mono text-xs flex items-center gap-1.5">
+                            <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+                            <span>Telegram & WA Боты</span>
+                        </span>
+                        <div class="flex items-center gap-1 text-accent-cyan font-mono text-xs bg-accent-cyan/10 px-2.5 py-1 rounded-full">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                            <span>Авто-воронка</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-titanium-100 group-hover:text-accent-cyan transition-colors mb-3">
+                        Чат-Бот Автоматизации Продаж
+                    </h3>
+                    
+                    <p class="text-titanium-400 text-sm leading-relaxed mb-6">
+                        Бот, который сам квалифицирует входящего клиента, выдает каталог товаров/услуг, рассчитывает стоимость и мгновенно пересылает контакты вам в личку.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-3 mb-6 text-xs font-mono">
+                        <div class="p-3 rounded-xl bg-obsidian-card border border-obsidian-border">
+                            <div class="text-titanium-500 text-[10px]">РЕАКЦИЯ</div>
+                            <div class="text-accent-cyan font-bold text-sm">24/7 без паузы</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-obsidian-card border border-obsidian-border">
+                            <div class="text-titanium-500 text-[10px]">ЭКОНОМИЯ ВРЕМЕНИ</div>
+                            <div class="text-accent-emerald font-bold text-sm">До 85% вопросов</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-obsidian-border flex items-center justify-between">
+                    <div class="flex gap-2 text-xs font-mono text-titanium-500">
+                        <span>Python</span> • <span>Aiogram</span> • <span>Webhooks</span>
+                    </div>
+                    <a href="#simulator" class="px-4 py-2 rounded-xl bg-obsidian-card hover:bg-accent-emerald hover:text-obsidian text-titanium-100 text-xs font-bold transition-all flex items-center gap-2">
+                        <span>Тест в симуляторе</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- LIVE INTERACTIVE BOT SIMULATOR -->
+    <section id="simulator" class="py-24 relative z-10 bg-obsidian-surface/60 border-y border-obsidian-border">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                <div>
+                    <span class="font-mono text-xs text-accent-cyan uppercase tracking-widest">// Интерактив</span>
+                    <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-titanium-100 mt-2">
+                        Попробуйте Бота Прямо Сейчас
+                    </h2>
+                </div>
+                <p class="text-titanium-400 text-sm max-w-md leading-relaxed">
+                    Нажимайте на кнопки в экране смартфона ниже. Изображение имитирует реальный диалог с вашим будущим клиентом.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="matte-card rounded-3xl p-6 sm:p-8 border border-obsidian-border">
+                        <h3 class="text-xl font-bold text-titanium-100 mb-4 flex items-center gap-3">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-accent-cyan"></i>
+                            <span>Зачем вам такой бот?</span>
+                        </h3>
+                        <p class="text-titanium-400 text-sm leading-relaxed mb-6">
+                            Пока вы на встрече или спите, бот отвечает клиенту за полсекунды: показывает актуальные цены, отвечает на частые вопросы и собирает номер телефона.
+                        </p>
+
+                        <div class="flex gap-3 p-1.5 rounded-2xl bg-obsidian border border-obsidian-border font-mono text-xs">
+                            <button id="simTgTab" onclick="setSimPlatform('telegram')" class="flex-1 py-2.5 rounded-xl bg-accent-telegram text-white font-bold flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                                <span>Telegram</span>
+                            </button>
+                            <button id="simWaTab" onclick="setSimPlatform('whatsapp')" class="flex-1 py-2.5 rounded-xl text-titanium-400 hover:text-white flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="message-square" class="w-4 h-4"></i>
+                                <span>WhatsApp</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-obsidian-card border border-obsidian-border text-xs font-mono text-titanium-400 flex items-center gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-accent-cyan flex-shrink-0"></i>
+                        <span>Тексты и логика бота адаптируются под любой бизнес за 1-2 дня.</span>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 flex justify-center">
+                    <div id="phoneScreen" class="w-full max-w-md rounded-[38px] bg-obsidian border-4 border-obsidian-border shadow-2xl overflow-hidden flex flex-col h-[560px] relative transition-colors duration-300 cursor-target-area">
+                        
+                        <div id="phoneHeader" class="bg-[#17212b] px-5 py-3 flex items-center justify-between border-b border-white/10 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div class="w-9 h-9 rounded-full bg-accent-cyan flex items-center justify-center text-obsidian font-bold text-xs">
+                                        <i data-lucide="bot" class="w-5 h-5"></i>
+                                    </div>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-obsidian absolute bottom-0 right-0"></span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-xs text-white" id="botHeaderName">Asik Assistant Bot</span>
+                                    <span class="text-[10px] text-accent-cyan font-mono" id="botHeaderStatus">online • помощник</span>
+                                </div>
+                            </div>
+
+                            <button onclick="resetBotSim()" class="text-titanium-400 hover:text-white p-1 text-xs font-mono" title="Сбросить диалог">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs chat-scroll bg-obsidian/90">
+                            <!-- Live Chat Dynamic Messages -->
+                        </div>
+
+                        <div id="typingIndicator" class="px-4 py-1.5 text-[11px] font-mono text-titanium-500 hidden flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-bounce"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.2s]"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.4s]"></span>
+                            <span>печатает ответ...</span>
+                        </div>
+
+                        <div id="chatOptions" class="p-3 bg-obsidian-card border-t border-white/10 flex flex-col gap-2">
+                            <!-- Dynamic Options -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECT COST & ROI CALCULATOR -->
+    <section id="calculator" class="py-24 relative z-10 max-w-7xl mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="font-mono text-xs text-accent-emerald uppercase tracking-widest">// Прозрачный расчёт</span>
+            <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-titanium-100 mt-2">
+                Калькулятор Стоимости
+            </h2>
+            <p class="text-titanium-400 text-sm mt-3 leading-relaxed">
+                Выбирайте нужные параметры. Всё прозрачно: никаких скрытых платежей.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <div class="lg:col-span-7 matte-card rounded-3xl p-6 sm:p-8 border border-obsidian-border space-y-8">
+                
+                <div>
+                    <label class="block text-xs font-mono text-accent-cyan mb-3 uppercase tracking-wider">1. Веб-Сайт</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="calc-option p-4 rounded-2xl bg-obsidian-card border border-obsidian-border cursor-pointer flex flex-col justify-between hover:border-accent-cyan transition-all">
+                            <input type="radio" name="siteType" value="landing" checked onchange="updateCalc()" class="sr-only">
+                            <span class="font-bold text-titanium-100 text-sm">Лендинг</span>
+                            <span class="text-[10px] font-mono text-accent-cyan mt-2">от $150</span>
+                        </label>
+                        <label class="calc-option p-4 rounded-2xl bg-obsidian-card border border-obsidian-border cursor-pointer flex flex-col justify-between hover:border-accent-cyan transition-all">
+                            <input type="radio" name="siteType" value="corporate" onchange="updateCalc()" class="sr-only">
+                            <span class="font-bold text-titanium-100 text-sm">Многостраничник</span>
+                            <span class="text-[10px] font-mono text-accent-cyan mt-2">от $250</span>
+                        </label>
+                        <label class="calc-option p-4 rounded-2xl bg-obsidian-card border border-obsidian-border cursor-pointer flex flex-col justify-between hover:border-accent-cyan transition-all">
+                            <input type="radio" name="siteType" value="webapp" onchange="updateCalc()" class="sr-only">
+                            <span class="font-bold text-titanium-100 text-sm">Web App / SaaS</span>
+                            <span class="text-[10px] font-mono text-accent-cyan mt-2">от $450</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-accent-emerald mb-3 uppercase tracking-wider">2. Чат-Бот</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="calc-option p-4 rounded-2xl bg-obsidian-card border border-obsidian-border cursor-pointer flex flex-col justify-between hover:border-accent-emerald transition-all">
+                            <input type="radio" name="botType" value="none" onchange="updateCalc()" class="sr-only">
+                            <span class="font-bold text-titanium-100 text-sm">Без Бота</span>
+                            <span class="text-[10px] font-mono text-titanium-500 mt-2">$0</span>
+                        </label>
+                        <label class="calc-option p-4 rounded-2xl bg-obsidian-card border border-obsidian-border cursor-pointer flex flex-col justify-between hover:border-accent-emerald transition-all">
+                            <input type="radio" name="botType" value="telegram" checked onchange="updateCalc()" class="sr-only">
+                            <span class="font-bold text-titanium-100 text-sm">Telegram Бот</span>
+                            <span class="text-[10px] font-mono text-accent-emerald mt-2">от $100</span>
+                        </label>
+                        <label class="calc-option p-4 rounded-2xl bg-obsidian-card border border-obsidian-border cursor-pointer flex flex-col justify-between hover:border-accent-emerald transition-all">
+                            <input type="radio" name="botType" value="duo" onchange="updateCalc()" class="sr-only">
+                            <span class="font-bold text-titanium-100 text-sm">Telegram + WA</span>
+                            <span class="text-[10px] font-mono text-accent-emerald mt-2">от $200</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-titanium-400 mb-3 uppercase tracking-wider">3. Дополнительные фичи</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="flex items-center gap-3 p-3.5 rounded-xl bg-obsidian-card border border-obsidian-border cursor-pointer hover:border-white/20">
+                            <input type="checkbox" id="modCrm" checked onchange="updateCalc()" class="w-4 h-4 accent-accent-cyan rounded">
+                            <span class="text-xs text-titanium-200">Связка с CRM / Google Таблицами (+$50)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3.5 rounded-xl bg-obsidian-card border border-obsidian-border cursor-pointer hover:border-white/20">
+                            <input type="checkbox" id="modPayments" checked onchange="updateCalc()" class="w-4 h-4 accent-accent-cyan rounded">
+                            <span class="text-xs text-titanium-200">Прием онлайн-оплат (+$40)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3.5 rounded-xl bg-obsidian-card border border-obsidian-border cursor-pointer hover:border-white/20">
+                            <input type="checkbox" id="modAi" onchange="updateCalc()" class="w-4 h-4 accent-accent-cyan rounded">
+                            <span class="text-xs text-titanium-200">ChatGPT ИИ-консультант (+$80)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3.5 rounded-xl bg-obsidian-card border border-obsidian-border cursor-pointer hover:border-white/20">
+                            <input type="checkbox" id="modAnalytics" checked onchange="updateCalc()" class="w-4 h-4 accent-accent-cyan rounded">
+                            <span class="text-xs text-titanium-200">Настройка Яндекс/Google Метрики (+$30)</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-5 matte-card rounded-3xl p-6 sm:p-8 border border-accent-cyan/30 sticky top-28 space-y-6 bg-obsidian-card shadow-2xl">
+                <div class="flex items-center justify-between border-b border-obsidian-border pb-4">
+                    <span class="font-mono text-xs text-titanium-400 uppercase">Оценка сметы</span>
+                    <span class="px-2.5 py-1 rounded-full bg-accent-cyan/10 text-accent-cyan font-mono text-[11px]">Готовый набор</span>
+                </div>
+
+                <div>
+                    <div class="text-xs text-titanium-500 font-mono mb-1">ИГОГОВАЯ СТОИМОСТЬ</div>
+                    <div id="calcPriceDisplay" class="text-4xl font-mono font-extrabold text-titanium-100">$370</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 py-4 border-y border-obsidian-border font-mono text-xs">
+                    <div>
+                        <div class="text-titanium-500 mb-1">СРОК ИСПОЛНЕНИЯ</div>
+                        <div id="calcTimeDisplay" class="font-bold text-accent-cyan text-sm">4-7 рабочих дней</div>
+                    </div>
+                    <div>
+                        <div class="text-titanium-500 mb-1">РАЗРАБОТЧИК</div>
+                        <div class="font-bold text-accent-emerald text-sm">Asik (@Auramonster)</div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <a id="calcTgBtn" href="https://t.me/Auramonster" target="_blank" class="w-full py-4 rounded-xl bg-accent-cyan text-obsidian font-bold text-xs uppercase tracking-wider hover:bg-titanium-100 transition-all flex items-center justify-center gap-2 shadow-lg shadow-accent-cyan/20">
+                        <span>Забронировать в Telegram</span>
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </a>
+                    
+                    <a id="calcWaBtn" href="https://wa.me/77479473841" target="_blank" class="w-full py-3 rounded-xl bg-obsidian border border-emerald-500/30 text-emerald-400 font-mono text-xs uppercase tracking-wider hover:bg-emerald-500/10 transition-all flex items-center justify-center gap-2">
+                        <span>Написать в WhatsApp</span>
+                        <i data-lucide="message-square" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER & CONTACTS -->
+    <footer id="contact" class="py-16 border-t border-obsidian-border text-titanium-400 font-mono text-xs relative z-10 bg-obsidian-surface">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div>
+                <div class="font-bold text-sm text-titanium-100">Asik // Web & Bot Automation</div>
+                <div class="text-titanium-500 mt-1">Астана, Казахстан • На связи в мессенджерах</div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-6">
+                <a href="https://t.me/Auramonster" target="_blank" class="hover:text-accent-cyan transition-colors flex items-center gap-1.5">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span>@Auramonster</span>
+                </a>
+                <a href="https://wa.me/77479473841" target="_blank" class="hover:text-accent-whatsapp transition-colors flex items-center gap-1.5">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    <span>+7 (747) 947-38-41</span>
+                </a>
+                <a href="https://github.com/baursak007" target="_blank" class="hover:text-titanium-100 transition-colors flex items-center gap-1.5">
+                    <i data-lucide="github" class="w-4 h-4"></i>
+                    <span>baursak007</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MAIN JAVASCRIPT ENGINE -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initCustomCursor();
+        });
+
+        /* -------------------------------------------------------------
+           1. VERCEL/LINEAR DUAL MOUSE CURSOR (144HZ LERP)
+           ------------------------------------------------------------- */
+        function initCustomCursor() {
+            const dot = document.getElementById('cursorDot');
+            const ring = document.getElementById('cursorRing');
+            if (!dot || !ring) return;
+
+            let mouseX = -100, mouseY = -100;
+            let ringX = -100, ringY = -100;
+            let isMoving = false;
+
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                if (!isMoving) {
+                    isMoving = true;
+                    document.body.classList.remove('cursor-hidden');
+                }
+                dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+            });
+
+            function renderCursor() {
+                ringX += (mouseX - ringX) * 0.18;
+                ringY += (mouseY - ringY) * 0.18;
+                ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+                requestAnimationFrame(renderCursor);
+            }
+            requestAnimationFrame(renderCursor);
+
+            window.addEventListener('mousedown', () => document.body.classList.add('cursor-is-pressed'));
+            window.addEventListener('mouseup', () => document.body.classList.remove('cursor-is-pressed'));
+
+            document.addEventListener('mouseleave', () => document.body.classList.add('cursor-hidden'));
+            document.addEventListener('mouseenter', () => document.body.classList.remove('cursor-hidden'));
+
+            const interactiveSelector = 'a, button, input, textarea, select, label, .calc-option, .matte-card';
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest(interactiveSelector);
+                const targetArea = e.target.closest('.cursor-target-area');
+
+                if (targetArea) {
+                    document.body.classList.add('cursor-is-target');
+                    document.body.classList.remove('cursor-is-hovering');
+                } else if (target) {
+                    document.body.classList.add('cursor-is-hovering');
+                    document.body.classList.remove('cursor-is-target');
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                const target = e.target.closest(interactiveSelector);
+                const targetArea = e.target.closest('.cursor-target-area');
+                if (target) document.body.classList.remove('cursor-is-hovering');
+                if (targetArea) document.body.classList.remove('cursor-is-target');
+            });
+        }
+
+        /* -------------------------------------------------------------
+           2. THREE.JS 3D GLOWING NETWORK MESH (144 FPS OPTIMIZED)
+           ------------------------------------------------------------- */
+        let scene, camera, renderer;
+        let nodeParticles, lineMesh;
+        let mouseX3D = 0, mouseY3D = 0;
+        let targetX3D = 0, targetY3D = 0;
+        
+        const nodeCount = 70;
+        const maxDistance = 2.4;
+        const positions = [];
+        const velocities = [];
+
+        function initThreeJS() {
+            const canvas = document.getElementById('webglCanvas');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            camera.position.z = 7;
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const pGeo = new THREE.BufferGeometry();
+            const pPos = new Float32Array(nodeCount * 3);
+
+            for (let i = 0; i < nodeCount; i++) {
+                const x = (Math.random() - 0.5) * 12;
+                const y = (Math.random() - 0.5) * 12;
+                const z = (Math.random() - 0.5) * 6;
+                
+                pPos[i * 3] = x;
+                pPos[i * 3 + 1] = y;
+                pPos[i * 3 + 2] = z;
+
+                positions.push(new THREE.Vector3(x, y, z));
+                velocities.push(new THREE.Vector3((Math.random() - 0.5) * 0.005, (Math.random() - 0.5) * 0.005, (Math.random() - 0.5) * 0.003));
+            }
+
+            pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+
+            const pMat = new THREE.PointsMaterial({
+                color: 0x00f2fe,
+                size: 0.07,
+                transparent: true,
+                opacity: 0.85
+            });
+
+            nodeParticles = new THREE.Points(pGeo, pMat);
+            scene.add(nodeParticles);
+
+            const lineGeo = new THREE.BufferGeometry();
+            const lineMat = new THREE.LineBasicMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.22
+            });
+            lineMesh = new THREE.LineSegments(lineGeo, lineMat);
+            scene.add(lineMesh);
+
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('mousemove', onMouseMove3D);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onMouseMove3D(e) {
+            mouseX3D = (e.clientX - window.innerWidth / 2) * 0.0005;
+            mouseY3D = (e.clientY - window.innerHeight / 2) * 0.0005;
+
+            document.querySelectorAll('.spotlight-card').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            });
+        }
+
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+
+            targetX3D += (mouseX3D - targetX3D) * 0.05;
+            targetY3D += (mouseY3D - targetY3D) * 0.05;
+
+            const pPositions = nodeParticles.geometry.attributes.position.array;
+            const linePositions = [];
+
+            for (let i = 0; i < nodeCount; i++) {
+                positions[i].add(velocities[i]);
+
+                if (Math.abs(positions[i].x) > 6) velocities[i].x *= -1;
+                if (Math.abs(positions[i].y) > 6) velocities[i].y *= -1;
+                if (Math.abs(positions[i].z) > 3) velocities[i].z *= -1;
+
+                pPositions[i * 3] = positions[i].x;
+                pPositions[i * 3 + 1] = positions[i].y;
+                pPositions[i * 3 + 2] = positions[i].z;
+
+                for (let j = i + 1; j < nodeCount; j++) {
+                    const dist = positions[i].distanceTo(positions[j]);
+                    if (dist < maxDistance) {
+                        linePositions.push(positions[i].x, positions[i].y, positions[i].z);
+                        linePositions.push(positions[j].x, positions[j].y, positions[j].z);
+                    }
+                }
+            }
+
+            nodeParticles.geometry.attributes.position.needsUpdate = true;
+            lineMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+
+            scene.rotation.y = targetX3D * 0.5;
+            scene.rotation.x = -targetY3D * 0.5;
+
+            renderer.render(scene, camera);
+        }
+
+        /* -------------------------------------------------------------
+           3. LIVE BOT SIMULATOR ENGINE (HUMAN TONE)
+           ------------------------------------------------------------- */
+        let currentPlatform = 'telegram';
+
+        const botDialogueTree = {
+            start: {
+                text: "Здарова! Я виртуальный бот Asik'а. Какой у тебя вопрос?",
+                options: [
+                    { label: "💈 Посмотреть проект Arqa Barbershop", next: "arqa_info" },
+                    { label: "💰 Сколько стоит заказать сайт/бота?", next: "price_info" },
+                    { label: "📲 Написать Asik'у в личку", next: "contact_asik" }
+                ]
+            },
+            arqa_info: {
+                text: "Arqa — это рабочий лендинг для барбершопа с фокусом на мобильные устройства и удобную запись.\n\nИсходники лежат открыто на GitHub!",
+                options: [
+                    { label: "🔗 Открыть GitHub репозиторий", action: "open_arqa" },
+                    { label: "◀ В главное меню", next: "start" }
+                ]
+            },
+            price_info: {
+                text: "Актуальные цены:\n• Лендинги — от $150\n• Чат-боты — от $100\n• Комплекс (Сайт + Бот + CRM) — от $400\n\nЧуть ниже на странице есть удобный калькулятор!",
+                options: [
+                    { label: "📲 Написать в Telegram (@Auramonster)", action: "open_tg" },
+                    { label: "◀ В главное меню", next: "start" }
+                ]
+            },
+            contact_asik: {
+                text: "Asik обычно отвечает в течение 5-15 минут. Выбирай удобный мессенджер:",
+                options: [
+                    { label: "🔹 Написать в Telegram (@Auramonster)", action: "open_tg" },
+                    { label: "🟢 Написать в WhatsApp (+77479473841)", action: "open_wa" }
+                ]
+            }
+        };
+
+        function setSimPlatform(platform) {
+            currentPlatform = platform;
+            const header = document.getElementById('phoneHeader');
+            const botName = document.getElementById('botHeaderName');
+            const tgBtn = document.getElementById('simTgTab');
+            const waBtn = document.getElementById('simWaTab');
+
+            if (platform === 'whatsapp') {
+                header.className = "bg-[#075e54] px-5 py-3 flex items-center justify-between border-b border-white/10 transition-colors";
+                botName.textContent = "Asik WhatsApp Bot";
+                waBtn.className = "flex-1 py-2.5 rounded-xl bg-accent-whatsapp text-white font-bold flex items-center justify-center gap-2 transition-all";
+                tgBtn.className = "flex-1 py-2.5 rounded-xl text-titanium-400 hover:text-white flex items-center justify-center gap-2 transition-all";
+            } else {
+                header.className = "bg-[#17212b] px-5 py-3 flex items-center justify-between border-b border-white/10 transition-colors";
+                botName.textContent = "Asik Telegram Bot";
+                tgBtn.className = "flex-1 py-2.5 rounded-xl bg-accent-telegram text-white font-bold flex items-center justify-center gap-2 transition-all";
+                waBtn.className = "flex-1 py-2.5 rounded-xl text-titanium-400 hover:text-white flex items-center justify-center gap-2 transition-all";
+            }
+            playSynthClick(600, 0.03);
+        }
+
+        function renderBotStep(stepKey) {
+            const stepData = botDialogueTree[stepKey];
+            const chatContainer = document.getElementById('chatMessages');
+            const typing = document.getElementById('typingIndicator');
+            const optionsContainer = document.getElementById('chatOptions');
+
+            optionsContainer.innerHTML = '';
+            typing.classList.remove('hidden');
+
+            setTimeout(() => {
+                typing.classList.add('hidden');
+                
+                const botMsg = document.createElement('div');
+                botMsg.className = "flex flex-col items-start max-w-[85%] self-start animate-fade-in";
+                botMsg.innerHTML = `
+                    <div class="p-3.5 rounded-2xl ${currentPlatform === 'whatsapp' ? 'bg-[#1f2c34] text-white' : 'bg-[#2b5278] text-white'} shadow-md whitespace-pre-line leading-relaxed">
+                        ${stepData.text}
+                    </div>
+                    <span class="text-[9px] font-mono text-titanium-500 mt-1 ml-1">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                `;
+                chatContainer.appendChild(botMsg);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                stepData.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full py-2.5 px-3 rounded-xl bg-obsidian border border-white/15 hover:border-accent-cyan text-titanium-100 text-xs font-medium text-left transition-all flex items-center justify-between group";
+                    btn.innerHTML = `<span>${opt.label}</span> <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-titanium-500 group-hover:text-accent-cyan"></i>`;
+                    
+                    btn.onclick = () => {
+                        if (opt.action === 'open_tg') {
+                            window.open('https://t.me/Auramonster', '_blank');
+                            return;
+                        }
+                        if (opt.action === 'open_wa') {
+                            window.open('https://wa.me/77479473841', '_blank');
+                            return;
+                        }
+                        if (opt.action === 'open_arqa') {
+                            window.open('https://github.com/baursak007/arqa', '_blank');
+                            return;
+                        }
+
+                        const userMsg = document.createElement('div');
+                        userMsg.className = "flex flex-col items-end max-w-[80%] self-end";
+                        userMsg.innerHTML = `
+                            <div class="p-3 rounded-2xl ${currentPlatform === 'whatsapp' ? 'bg-[#056162] text-white' : 'bg-[#0088cc] text-white'} shadow-md">
+                                ${opt.label}
+                            </div>
+                        `;
+                        chatContainer.appendChild(userMsg);
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                        playSynthClick(750, 0.04);
+                        renderBotStep(opt.next);
+                    };
+                    optionsContainer.appendChild(btn);
+                });
+                lucide.createIcons();
+            }, 500);
+        }
+
+        function resetBotSim() {
+            document.getElementById('chatMessages').innerHTML = '';
+            renderBotStep('start');
+        }
+
+        /* -------------------------------------------------------------
+           4. CALCULATOR WITH ACTUAL PRICING ($150 / $100 / $400)
+           ------------------------------------------------------------- */
+        function updateCalc() {
+            const siteType = document.querySelector('input[name="siteType"]:checked')?.value || 'landing';
+            const botType = document.querySelector('input[name="botType"]:checked')?.value || 'telegram';
+            
+            const modCrm = document.getElementById('modCrm').checked;
+            const modPayments = document.getElementById('modPayments').checked;
+            const modAi = document.getElementById('modAi').checked;
+            const modAnalytics = document.getElementById('modAnalytics').checked;
+
+            let price = 0;
+            let daysMin = 0;
+            let daysMax = 0;
+
+            if (siteType === 'landing') { price += 150; daysMin += 3; daysMax += 5; }
+            else if (siteType === 'corporate') { price += 250; daysMin += 6; daysMax += 10; }
+            else if (siteType === 'webapp') { price += 450; daysMin += 10; daysMax += 16; }
+
+            if (botType === 'telegram') { price += 100; daysMin += 2; daysMax += 4; }
+            else if (botType === 'duo') { price += 200; daysMin += 4; daysMax += 7; }
+
+            if (modCrm) { price += 50; }
+            if (modPayments) { price += 40; }
+            if (modAi) { price += 80; daysMin += 2; daysMax += 3; }
+            if (modAnalytics) { price += 30; }
+
+            document.getElementById('calcPriceDisplay').textContent = `$${price}`;
+            document.getElementById('calcTimeDisplay').textContent = `${daysMin}-${daysMax} рабочих дней`;
+
+            const tgMsg = encodeURIComponent(`Здарова, Asik! Посчитал смету на твоем сайте: $${price} (${daysMin}-${daysMax} дней). Хочу обсудить проект.`);
+            document.getElementById('calcTgBtn').href = `https://t.me/Auramonster?text=${tgMsg}`;
+            document.getElementById('calcWaBtn').href = `https://wa.me/77479473841?text=${tgMsg}`;
+
+            playSynthClick(500, 0.02);
+        }
+
+        /* -------------------------------------------------------------
+           5. AUDIO FEEDBACK
+           ------------------------------------------------------------- */
+        let audioCtx = null;
+        let soundEnabled = false;
+
+        document.getElementById('soundToggleBtn').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            if (soundEnabled) {
+                btn.classList.add('text-accent-cyan', 'border-accent-cyan');
+                showToast('Звуковые клики включены');
+                playSynthClick(800, 0.03);
+            } else {
+                btn.classList.remove('text-accent-cyan', 'border-accent-cyan');
+                showToast('Звуковые клики отключены');
+            }
+        });
+
+        function playSynthClick(freq = 440, duration = 0.04) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'matte-card border border-accent-cyan/30 px-4 py-3 rounded-2xl text-xs font-mono text-titanium-100 shadow-2xl flex items-center gap-2.5 transition-all transform translate-y-4 opacity-0 pointer-events-auto bg-obsidian-card';
+            toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-accent-cyan"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        window.onload = function() {
+            initThreeJS();
+            animate();
+            renderBotStep('start');
+            updateCalc();
+        };
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileDrawer').classList.toggle('hidden');
+        });
+        document.querySelectorAll('.mobile-link').forEach(l => {
+            l.addEventListener('click', () => {
+                document.getElementById('mobileDrawer').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
