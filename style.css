@@ -289,5 +289,11 @@ h1, h2, .next strong { overflow-wrap: break-word; }
 /* denser header so scrolled content doesn't show through the buttons */
 .site-header { background: linear-gradient(var(--bg) 70%, transparent); }
 @media (max-width: 760px) {
-  .site-header { background: color-mix(in srgb, var(--bg) 92%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); padding-bottom: 0.6rem; }
+  .site-header { background: var(--bg); padding-bottom: 0.6rem; }
+}
+
+/* closed mobile menu must be fully hidden (never show through the page) */
+@media (max-width: 760px) {
+  .nav { visibility: hidden; transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1), visibility 0s 0.5s; }
+  .nav.open { visibility: visible; transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1), visibility 0s 0s; }
 }
