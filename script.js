@@ -3,6 +3,11 @@
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce) root.classList.add("paused");
 
+  // Translated UI strings (falls back to English if i18n.js is missing)
+  function tr(key, fallback) {
+    return (window.I18N && window.I18N.t(key)) || fallback;
+  }
+
   // Theme toggle (remembered in the browser)
   var tb = document.querySelector(".theme-btn");
   if (tb) {
@@ -13,25 +18,36 @@
     });
   }
 
-  // Mobile menu
+  // Mobile menu + pause button labels (they change with state and language)
   var mb = document.querySelector(".menu-btn");
   var nav = document.getElementById("nav");
+  var pb = document.getElementById("pause");
+
+  function refreshLabels() {
+    if (mb && nav) {
+      mb.textContent = nav.classList.contains("open") ? tr("close", "Close") : tr("menu", "Menu");
+    }
+    if (pb) {
+      pb.textContent = root.classList.contains("paused") ? tr("play", "Play animations") : tr("pause", "Pause animations");
+    }
+  }
+
   if (mb && nav) {
     mb.addEventListener("click", function () {
       var open = nav.classList.toggle("open");
+      document.body.classList.toggle("menu-open", open);
       mb.setAttribute("aria-expanded", open);
-      mb.textContent = open ? "Close" : "Menu";
+      refreshLabels();
     });
   }
-
-  // Pause / play animations
-  var pb = document.getElementById("pause");
   if (pb) {
     pb.addEventListener("click", function () {
-      var paused = root.classList.toggle("paused");
-      pb.textContent = paused ? "Play animations" : "Pause animations";
+      root.classList.toggle("paused");
+      refreshLabels();
     });
   }
+  document.addEventListener("langchange", refreshLabels);
+  refreshLabels();
 
   // Live Astana clock
   var clock = document.getElementById("clock");
@@ -67,7 +83,7 @@
     els.forEach(function (el) { el.classList.add("in"); });
   }
 
-  // Page transition: a curtain wipes up with the name of the next page
+  // Curtain: wipes up between pages and when the language changes
   var curtain = document.createElement("div");
   curtain.className = "curtain";
   curtain.setAttribute("aria-hidden", "true");
@@ -75,10 +91,20 @@
   curtain.appendChild(clabel);
   document.body.appendChild(curtain);
 
-  var pageNames = {
+  var pageKeys = {
+    "index.html": "pg.home", "work.html": "pg.work", "about.html": "pg.about",
+    "notes.html": "pg.notes", "play.html": "pg.play", "contact.html": "pg.contact"
+  };
+  var pageFallback = {
     "index.html": "Home", "work.html": "Work", "about.html": "About",
     "notes.html": "Notes", "play.html": "Play", "contact.html": "Contact"
   };
+
+  function revealOut() {
+    curtain.classList.remove("cover");
+    curtain.classList.add("reveal-out");
+    setTimeout(function () { curtain.classList.remove("reveal-out"); }, 900);
+  }
 
   var incoming = null;
   try { incoming = sessionStorage.getItem("t"); } catch (e) {}
@@ -105,11 +131,32 @@
     if (reduce || root.classList.contains("paused")) return;
     e.preventDefault();
     var file = url.pathname.split("/").pop() || "index.html";
-    var name = pageNames[file] || "";
+    var name = tr(pageKeys[file], pageFallback[file] || "");
     clabel.textContent = name;
     curtain.classList.add("cover");
     try { sessionStorage.setItem("t", name); } catch (err) {}
     setTimeout(function () { location.href = url.href; }, 650);
+  });
+
+  // Language switch: the curtain covers the page, the text changes underneath, then it lifts
+  var switching = false;
+  document.querySelectorAll(".lang-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (!window.I18N || switching) return;
+      var next = window.I18N.lang === "ru" ? "en" : "ru";
+      if (reduce || root.classList.contains("paused")) {
+        window.I18N.set(next);
+        return;
+      }
+      switching = true;
+      clabel.textContent = next === "ru" ? "Русский" : "English";
+      curtain.classList.add("cover");
+      setTimeout(function () {
+        window.I18N.set(next);
+        revealOut();
+        setTimeout(function () { switching = false; }, 800);
+      }, 650);
+    });
   });
 
   window.addEventListener("pageshow", function (e) {

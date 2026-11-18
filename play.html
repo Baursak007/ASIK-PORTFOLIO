@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-page="play">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Play — Asik</title>
   <meta name="description" content="Try a demo of a booking chatbot.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
   <noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
@@ -15,34 +15,37 @@
 <body>
   <header class="site-header">
     <a class="logo" href="index.html">Asik<span>.</span></a>
-    <button class="menu-btn" aria-expanded="false" aria-controls="nav">Menu</button>
-    <nav id="nav" class="nav">
-      <a href="work.html">Work</a>
-      <a href="about.html">About</a>
-      <a href="notes.html">Notes</a>
-      <a href="play.html" aria-current="page">Play</a>
-      <a href="contact.html">Contact</a>
-      <button class="theme-btn" aria-label="Switch light/dark theme">◐</button>
+    <nav id="nav" class="nav" aria-label="Main">
+      <a href="work.html" data-i18n="nav.work">Work</a>
+      <a href="about.html" data-i18n="nav.about">About</a>
+      <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      <a href="play.html" aria-current="page" data-i18n="nav.play">Play</a>
+      <a href="contact.html" data-i18n="nav.contact">Contact</a>
     </nav>
+    <div class="tools">
+      <button class="lang-btn" type="button" aria-label="Switch language"><span data-l="en">EN</span><span data-l="ru">RU</span></button>
+      <button class="theme-btn" type="button" aria-label="Switch light/dark theme"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/></svg></button>
+    </div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </header>
   <div class="hud" aria-hidden="true">Scroll <b id="scroll-n">000</b> / 100</div>
 
   <main>
     <section class="page-head">
-      <h1>Try the<br>bot.</h1>
-      <p>A small demo of the kind of chatbot I build for businesses. Tap the buttons like a client would.</p>
+      <h1 data-i18n="play.h1">Try the<br>bot.</h1>
+      <p data-i18n="play.p">A small demo of the kind of chatbot I build for businesses. Tap the buttons like a client would.</p>
     </section>
 
     <section class="demo reveal">
       <div class="demo-copy">
-        <p>A bot answers clients while you are busy: it shows prices, answers common questions and passes the client's contacts to you.</p>
-        <p>This demo runs in your browser. The real bots work in Telegram and WhatsApp.</p>
+        <p data-i18n="play.c1">A bot answers clients while you are busy: it shows prices, answers common questions and passes the client's contacts to you.</p>
+        <p data-i18n="play.c2">This demo runs in your browser. The real bots work in Telegram and WhatsApp.</p>
       </div>
 
       <div class="phone" role="region" aria-label="Chatbot demo">
         <div class="phone-top">
           <i></i><span>Asik Demo Bot</span>
-          <button id="reset" type="button">Reset</button>
+          <button id="reset" type="button" data-i18n="play.reset">Reset</button>
         </div>
         <div class="chat" id="chat" aria-live="polite"></div>
         <div class="typing" id="typing"></div>
@@ -51,52 +54,56 @@
     </section>
 
     <a class="next reveal" href="contact.html">
-      <small>05 / 06 · Next →</small>
-      <strong>Contact.</strong>
+      <small>05 / 06 · <span data-i18n="ui.next">Next →</span></small>
+      <strong data-i18n="next.contact">Contact.</strong>
     </a>
   </main>
 
   <footer class="site-footer">
     <span>© 2026 Asik</span>
-    <span class="live"><i></i>Open for projects · Astana <time id="clock"></time></span>
+    <span class="live"><i></i><span data-i18n="foot.open">Open for projects · Astana</span> <time id="clock"></time></span>
     <span class="links">
       <a href="https://t.me/Auramonster" target="_blank" rel="noopener">Telegram ↗</a>
       <a href="https://github.com/Baursak007" target="_blank" rel="noopener">GitHub ↗</a>
       <button id="pause" type="button">Pause animations</button>
     </span>
   </footer>
+  <script src="i18n.js"></script>
   <script src="script.js"></script>
   <script>
     (function () {
+      function lang() { return window.I18N ? window.I18N.lang : "en"; }
+      function pick(o) { return o[lang()]; }
+      var BACK = { en: "Back to menu", ru: "Назад в меню" };
       var tree = {
         start: {
-          text: "Hi! I'm Asik's demo bot. What would you like to know?",
+          text: { en: "Hi! I'm Asik's demo bot. What would you like to know?", ru: "Привет! Я демо-бот Asik. Что вас интересует?" },
           options: [
-            { label: "Show the Arqa project", next: "arqa" },
-            { label: "How much does a site or bot cost?", next: "price" },
-            { label: "Contact Asik", next: "contact" }
+            { label: { en: "Show the Arqa project", ru: "Показать проект Arqa" }, next: "arqa" },
+            { label: { en: "How much does a site or bot cost?", ru: "Сколько стоит сайт или бот?" }, next: "price" },
+            { label: { en: "Contact Asik", ru: "Связаться с Asik" }, next: "contact" }
           ]
         },
         arqa: {
-          text: "Arqa is a barbershop landing page with online booking. You can open the live site.",
+          text: { en: "Arqa is a barbershop landing page with online booking. You can open the live site.", ru: "Arqa — лендинг для барбершопа с онлайн-записью. Можно открыть работающий сайт." },
           options: [
-            { label: "Open the Arqa site", href: "https://baursak007.github.io/Arqa-barbershop/" },
-            { label: "Back to menu", next: "start" }
+            { label: { en: "Open the Arqa site", ru: "Открыть сайт Arqa" }, href: "https://baursak007.github.io/Arqa-barbershop/" },
+            { label: BACK, next: "start" }
           ]
         },
         price: {
-          text: "Prices:\n• Landing pages: from $150\n• Chatbots: from $100\n• Site + bot + CRM: from $400\n\nThe exact price depends on the task.",
+          text: { en: "Prices:\n• Landing pages: from $150\n• Chatbots: from $100\n• Site + bot + CRM: from $400\n\nThe exact price depends on the task.", ru: "Цены:\n• Лендинги — от $150\n• Чат-боты — от $100\n• Сайт + бот + CRM — от $400\n\nТочная цена зависит от задачи." },
           options: [
-            { label: "Message on Telegram", href: "https://t.me/Auramonster" },
-            { label: "Back to menu", next: "start" }
+            { label: { en: "Message on Telegram", ru: "Написать в Telegram" }, href: "https://t.me/Auramonster" },
+            { label: BACK, next: "start" }
           ]
         },
         contact: {
-          text: "Asik replies in Telegram and WhatsApp:",
+          text: { en: "Asik replies in Telegram and WhatsApp:", ru: "Asik отвечает в Telegram и WhatsApp:" },
           options: [
-            { label: "Telegram @Auramonster", href: "https://t.me/Auramonster" },
-            { label: "WhatsApp", href: "https://wa.me/77479473841" },
-            { label: "Back to menu", next: "start" }
+            { label: { en: "Telegram @Auramonster", ru: "Telegram @Auramonster" }, href: "https://t.me/Auramonster" },
+            { label: { en: "WhatsApp", ru: "WhatsApp" }, href: "https://wa.me/77479473841" },
+            { label: BACK, next: "start" }
           ]
         }
       };
@@ -118,18 +125,18 @@
         var step = tree[key];
         var my = ++token;
         options.innerHTML = "";
-        typing.textContent = "typing…";
+        typing.textContent = window.I18N ? window.I18N.t("typing") : "typing…";
         setTimeout(function () {
           if (my !== token) return;
           typing.textContent = "";
-          addMsg(step.text, "bot");
+          addMsg(pick(step.text), "bot");
           step.options.forEach(function (opt) {
             var b = document.createElement("button");
             b.type = "button";
-            b.textContent = opt.label;
+            b.textContent = pick(opt.label);
             b.addEventListener("click", function () {
               if (opt.href) { window.open(opt.href, "_blank", "noopener"); return; }
-              addMsg(opt.label, "me");
+              addMsg(pick(opt.label), "me");
               show(opt.next);
             });
             options.appendChild(b);
@@ -137,10 +144,9 @@
         }, 450);
       }
 
-      document.getElementById("reset").addEventListener("click", function () {
-        chat.innerHTML = "";
-        show("start");
-      });
+      function reset() { token++; chat.innerHTML = ""; show("start"); }
+      document.getElementById("reset").addEventListener("click", reset);
+      document.addEventListener("langchange", reset);
       show("start");
     })();
   </script>
