@@ -184,3 +184,32 @@ h1.big em { font-style: normal; color: var(--accent); }
   .stat + .stat { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
   .hud { display: none; }
 }
+
+/* ---------- page transition curtain ---------- */
+.curtain { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); transform: translateY(100%); pointer-events: none; }
+.curtain span { font-size: clamp(2.5rem, 10vw, 8rem); font-weight: 700; letter-spacing: -0.04em; text-transform: uppercase; opacity: 0; transition: opacity 0.3s 0.2s; }
+.curtain.cover { transform: none; pointer-events: all; transition: transform 0.6s cubic-bezier(0.7, 0, 0.2, 1); }
+.curtain.cover span { opacity: 1; }
+.curtain.start-covered { transform: none; transition: none; }
+.curtain.start-covered span { opacity: 1; transition: none; }
+.curtain.reveal-out { transform: translateY(-100%); transition: transform 0.7s cubic-bezier(0.7, 0, 0.2, 1); }
+.paused .curtain { display: none; }
+
+/* ---------- play page: bot demo ---------- */
+.demo { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; padding: 1rem 0 5rem; }
+.demo-copy p { color: var(--muted); max-width: 30rem; }
+.demo-copy p + p { margin-top: 1rem; }
+.phone { width: 100%; max-width: 26rem; margin-inline: auto; height: 34rem; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 2rem; background: var(--card); }
+.phone-top { display: flex; align-items: center; gap: 0.7rem; padding: 1rem 1.2rem; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 0.8rem; }
+.phone-top i { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--accent); }
+.phone-top button { margin-left: auto; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; }
+.phone-top button:hover { color: var(--accent); }
+.chat { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+.msg { max-width: 85%; padding: 0.7rem 1rem; border-radius: 1.1rem; font-size: 0.95rem; line-height: 1.45; white-space: pre-line; }
+.msg.bot { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); border-bottom-left-radius: 0.3rem; }
+.msg.me { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 0.3rem; }
+.typing { min-height: 1.5rem; padding: 0 1.2rem 0.5rem; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.options { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; border-top: 1px solid var(--line); }
+.options button { text-align: left; padding: 0.75rem 1rem; border: 1px solid var(--line); border-radius: 0.8rem; font-size: 0.9rem; transition: border-color 0.2s, color 0.2s; }
+.options button:hover { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 760px) { .demo { grid-template-columns: 1fr; } }

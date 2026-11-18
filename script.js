@@ -67,6 +67,55 @@
     els.forEach(function (el) { el.classList.add("in"); });
   }
 
+  // Page transition: a curtain wipes up with the name of the next page
+  var curtain = document.createElement("div");
+  curtain.className = "curtain";
+  curtain.setAttribute("aria-hidden", "true");
+  var clabel = document.createElement("span");
+  curtain.appendChild(clabel);
+  document.body.appendChild(curtain);
+
+  var pageNames = {
+    "index.html": "Home", "work.html": "Work", "about.html": "About",
+    "notes.html": "Notes", "play.html": "Play", "contact.html": "Contact"
+  };
+
+  var incoming = null;
+  try { incoming = sessionStorage.getItem("t"); } catch (e) {}
+  if (incoming && !reduce) {
+    try { sessionStorage.removeItem("t"); sessionStorage.setItem("seen", "1"); } catch (e) {}
+    clabel.textContent = incoming;
+    curtain.classList.add("start-covered");
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        curtain.classList.remove("start-covered");
+        curtain.classList.add("reveal-out");
+        setTimeout(function () { curtain.classList.remove("reveal-out"); }, 900);
+      });
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a || (a.target && a.target !== "_self")) return;
+    var url = new URL(a.href, location.href);
+    if (url.protocol !== location.protocol || url.host !== location.host) return;
+    if (url.pathname === location.pathname) return;
+    if (reduce || root.classList.contains("paused")) return;
+    e.preventDefault();
+    var file = url.pathname.split("/").pop() || "index.html";
+    var name = pageNames[file] || "";
+    clabel.textContent = name;
+    curtain.classList.add("cover");
+    try { sessionStorage.setItem("t", name); } catch (err) {}
+    setTimeout(function () { location.href = url.href; }, 650);
+  });
+
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) curtain.classList.remove("cover");
+  });
+
   // Loader (home page only, once per session)
   var ld = document.getElementById("loader");
   function ready() { document.body.classList.add("ready"); }
