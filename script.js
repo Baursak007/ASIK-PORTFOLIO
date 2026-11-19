@@ -2,39 +2,50 @@
   var root = document.documentElement;
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce) root.classList.add("paused");
+  try { history.scrollRestoration = "manual"; } catch (e) {}
 
   // Translated UI strings (falls back to English if i18n.js is missing)
   function tr(key, fallback) {
     return (window.I18N && window.I18N.t(key)) || fallback;
   }
 
+  // ---------- swipe helper (theme, language) ----------
+  // The new state swipes in over the old one using the View Transitions API.
+  // Browsers without it, reduced motion and paused animations just switch instantly.
+  var busy = false;
+  function canAnimate() {
+    return !!document.startViewTransition && !reduce && !root.classList.contains("paused");
+  }
+  function wipe(update) {
+    if (!canAnimate()) { update(); return; }
+    if (busy) return;
+    busy = true;
+    root.classList.add("vt-wipe");
+    var vt = document.startViewTransition(update);
+    function done() { root.classList.remove("vt-wipe"); busy = false; }
+    vt.finished.then(done, done);
+  }
+
   // Theme toggle (remembered in the browser)
   var tb = document.querySelector(".theme-btn");
-  var swapping = false;
   if (tb) {
     tb.addEventListener("click", function () {
-      if (swapping) return;
       var next = root.dataset.theme === "dark" ? "light" : "dark";
-      function apply() {
+      wipe(function () {
         root.dataset.theme = next;
         try { localStorage.setItem("theme", next); } catch (e) {}
-      }
-      // The new theme swipes in over the old one (View Transitions API).
-      // Browsers without it, or reduced motion / paused animations, switch instantly.
-      if (!document.startViewTransition || reduce || root.classList.contains("paused")) {
-        apply();
-        return;
-      }
-      swapping = true;
-      root.classList.add("theme-swap");
-      var vt = document.startViewTransition(apply);
-      vt.finished.then(done, done);
-      function done() {
-        root.classList.remove("theme-swap");
-        swapping = false;
-      }
+      });
     });
   }
+
+  // Language switch: same swipe as the theme
+  document.querySelectorAll(".lang-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (!window.I18N) return;
+      var next = window.I18N.lang === "ru" ? "en" : "ru";
+      wipe(function () { window.I18N.set(next); });
+    });
+  });
 
   // Mobile menu + pause button labels (they change with state and language)
   var mb = document.querySelector(".menu-btn");
@@ -48,6 +59,12 @@
     if (pb) {
       pb.textContent = root.classList.contains("paused") ? tr("play", "Play animations") : tr("pause", "Pause animations");
     }
+  }
+  function closeMenu() {
+    if (nav) nav.classList.remove("open");
+    document.body.classList.remove("menu-open");
+    if (mb) mb.setAttribute("aria-expanded", "false");
+    refreshLabels();
   }
 
   if (mb && nav) {
@@ -88,73 +105,133 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
-  // Reveal on scroll
-  var els = document.querySelectorAll(".reveal");
+  // Reveal on scroll (also used again after a page change)
+  var io = null;
   if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (entries) {
+    io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
       });
     }, { threshold: 0.15 });
-    els.forEach(function (el) { io.observe(el); });
-  } else {
-    els.forEach(function (el) { el.classList.add("in"); });
   }
-
-  // Curtain: wipes up between pages and when the language changes
-  var curtain = document.createElement("div");
-  curtain.className = "curtain";
-  curtain.setAttribute("aria-hidden", "true");
-  var clabel = document.createElement("span");
-  curtain.appendChild(clabel);
-  document.body.appendChild(curtain);
-
-  var pageKeys = {
-    "index.html": "pg.home", "work.html": "pg.work", "about.html": "pg.about",
-    "notes.html": "pg.notes", "play.html": "pg.play", "contact.html": "pg.contact"
-  };
-  var pageFallback = {
-    "index.html": "Home", "work.html": "Work", "about.html": "About",
-    "notes.html": "Notes", "play.html": "Play", "contact.html": "Contact"
-  };
-
-  function revealOut() {
-    curtain.classList.remove("cover");
-    curtain.classList.add("reveal-out");
-    setTimeout(function () { curtain.classList.remove("reveal-out"); }, 900);
-  }
-
-  // Page changes are animated by the browser in CSS (cross-document view transitions, see
-  // style.css): the old page zooms out and swipes left, the next one swipes in.
-  // Browsers without support just open the next page.
-  window.addEventListener("pageswap", function (e) {
-    // "Pause animations" also stops the page transition
-    if (e.viewTransition && root.classList.contains("paused")) e.viewTransition.skipTransition();
-  });
-
-  // Language switch: the curtain covers the page, the text changes underneath, then it lifts
-  var switching = false;
-  document.querySelectorAll(".lang-btn").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      if (!window.I18N || switching) return;
-      var next = window.I18N.lang === "ru" ? "en" : "ru";
-      if (reduce || root.classList.contains("paused")) {
-        window.I18N.set(next);
-        return;
-      }
-      switching = true;
-      clabel.textContent = next === "ru" ? "Русский" : "English";
-      curtain.classList.add("cover");
-      setTimeout(function () {
-        window.I18N.set(next);
-        revealOut();
-        setTimeout(function () { switching = false; }, 800);
-      }, 650);
+  function observeReveals() {
+    document.querySelectorAll(".reveal:not(.in)").forEach(function (el) {
+      if (io) io.observe(el); else el.classList.add("in");
     });
+  }
+  observeReveals();
+
+  // ---------- page changes: the page zooms out and swipes left, the next one swipes in ----------
+  // Pages are fetched and the <main> block is swapped inside a view transition.
+  // If anything is unsupported (or animations are paused) links just work as normal links.
+  var cache = {};
+  var curPath = location.pathname;
+
+  function pageFile(u) { return u.pathname.split("/").pop() || "index.html"; }
+  function isPage(u) { return /\.html$|\/$/.test(u.pathname); }
+
+  function prefetch(href) {
+    if (!cache[href]) {
+      cache[href] = fetch(href).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.text();
+      });
+      cache[href].catch(function () { delete cache[href]; });
+    }
+    return cache[href];
+  }
+
+  function swapPage(doc, url) {
+    var main = document.querySelector("main");
+    main.replaceWith(document.importNode(doc.querySelector("main"), true));
+
+    var page = doc.documentElement.getAttribute("data-page");
+    if (page) root.setAttribute("data-page", page);
+
+    var file = pageFile(url);
+    document.querySelectorAll("#nav a").forEach(function (a) {
+      if (pageFile(new URL(a.getAttribute("href"), url)) === file) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+
+    var md = doc.querySelector('meta[name="description"]');
+    if (window.I18N) {
+      window.I18N.refresh({ title: doc.title, desc: md ? md.getAttribute("content") : "" });
+    } else {
+      document.title = doc.title;
+    }
+
+    closeMenu();
+    document.body.classList.remove("cursor-hover", "cursor-down");
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    observeReveals();
+    onScroll();
+
+    // the demo bot on the Play page has its own script
+    if (document.getElementById("chat")) {
+      if (window.initPlay) {
+        window.initPlay();
+      } else if (!document.querySelector('script[src="play.js"]')) {
+        var s = document.createElement("script");
+        s.src = "play.js";
+        document.body.appendChild(s);
+      }
+    }
+  }
+
+  function go(url, push, back) {
+    if (busy) return;
+    busy = true;
+    prefetch(url.href).then(function (html) {
+      var doc = new DOMParser().parseFromString(html, "text/html");
+      if (!doc.querySelector("main")) throw new Error("no main");
+      root.classList.toggle("vt-back", !!back);
+      var vt = document.startViewTransition(function () {
+        if (push) history.pushState(null, "", url.href);
+        curPath = url.pathname;
+        swapPage(doc, url);
+      });
+      return vt.finished;
+    }).catch(function () {
+      location.href = url.href; // something went wrong: do a normal page load
+    }).then(function () {
+      root.classList.remove("vt-back");
+      busy = false;
+    });
+  }
+
+  function internal(a) {
+    var url = new URL(a.href, location.href);
+    if (url.origin !== location.origin || !isPage(url) || url.pathname === location.pathname) return null;
+    return url;
+  }
+
+  document.addEventListener("click", function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
+    var url = internal(a);
+    if (!url || !canAnimate()) return;
+    e.preventDefault();
+    go(url, true, false);
   });
 
-  window.addEventListener("pageshow", function (e) {
-    if (e.persisted) curtain.classList.remove("cover");
+  // load the next page while the pointer is over its link, so the swipe starts at once
+  function warm(e) {
+    var a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a || !canAnimate()) return;
+    var url = internal(a);
+    if (url) prefetch(url.href).catch(function () {});
+  }
+  document.addEventListener("mouseover", warm, { passive: true });
+  document.addEventListener("touchstart", warm, { passive: true });
+
+  // back / forward buttons
+  window.addEventListener("popstate", function () {
+    if (location.pathname === curPath) return; // only the #hash changed
+    var url = new URL(location.href);
+    if (!canAnimate()) { location.reload(); return; }
+    go(url, false, true);
   });
 
   // Cursor follower (mouse only): a dot that sticks to the pointer and a ring that trails it.
@@ -171,9 +248,9 @@
     document.body.appendChild(dot);
     document.body.classList.add("has-cursor");
 
-    var mx = -100, my = -100, rx = -100, ry = -100, running = false, seen = false;
+    var mx = -100, my = -100, rx = -100, ry = -100, running = false, pointerSeen = false;
 
-    function frame() {
+    var frame = function () {
       var k = root.classList.contains("paused") ? 1 : 0.18;
       rx += (mx - rx) * k;
       ry += (my - ry) * k;
@@ -183,26 +260,25 @@
       } else {
         running = false;
       }
-    }
+    };
 
     document.addEventListener("mousemove", function (e) {
       mx = e.clientX;
       my = e.clientY;
       dot.style.transform = "translate3d(" + mx + "px," + my + "px,0)";
-      if (!seen) {
-        seen = true;
+      if (!pointerSeen) {
+        pointerSeen = true;
         rx = mx;
         ry = my;
-        document.body.classList.add("cursor-on");
       }
+      document.body.classList.add("cursor-on");
       if (!running) {
         running = true;
         requestAnimationFrame(frame);
       }
     }, { passive: true });
 
-    document.addEventListener("mouseleave", function () { document.body.classList.remove("cursor-on"); seen = false; });
-    document.addEventListener("mouseenter", function () { document.body.classList.add("cursor-on"); });
+    document.addEventListener("mouseleave", function () { document.body.classList.remove("cursor-on"); });
 
     var HOVER = "a, button, [role='button'], summary";
     document.addEventListener("mouseover", function (e) {
@@ -222,9 +298,9 @@
   var ld = document.getElementById("loader");
   function ready() { document.body.classList.add("ready"); }
   if (ld) {
-    var seen = false;
-    try { seen = sessionStorage.getItem("seen"); } catch (e) {}
-    if (seen || reduce) {
+    var visited = false;
+    try { visited = sessionStorage.getItem("seen"); } catch (e) {}
+    if (visited || reduce) {
       ld.remove();
       ready();
     } else {

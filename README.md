@@ -5,7 +5,7 @@ Static portfolio site (HTML, CSS, JS). No build step, no dependencies.
 ## Files
 
 - `index.html`, `work.html`, `about.html`, `notes.html`, `play.html`, `contact.html`
-- `style.css`, `script.js`, `i18n.js`
+- `style.css`, `script.js`, `i18n.js`, `play.js` (the demo bot on the Play page)
 
 ## Before publishing
 

@@ -185,16 +185,6 @@ h1.big em { font-style: normal; color: var(--accent); }
   .hud { display: none; }
 }
 
-/* ---------- page transition curtain ---------- */
-.curtain { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); transform: translateY(100%); pointer-events: none; }
-.curtain span { font-size: clamp(2.5rem, 10vw, 8rem); font-weight: 700; letter-spacing: -0.04em; text-transform: uppercase; opacity: 0; transition: opacity 0.3s 0.2s; }
-.curtain.cover { transform: none; pointer-events: all; transition: transform 0.6s cubic-bezier(0.7, 0, 0.2, 1); }
-.curtain.cover span { opacity: 1; }
-.curtain.start-covered { transform: none; transition: none; }
-.curtain.start-covered span { opacity: 1; transition: none; }
-.curtain.reveal-out { transform: translateY(-100%); transition: transform 0.7s cubic-bezier(0.7, 0, 0.2, 1); }
-.paused .curtain { display: none; }
-
 /* ---------- play page: bot demo ---------- */
 .demo { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; padding: 1rem 0 5rem; }
 .demo-copy p { color: var(--muted); max-width: 30rem; }
@@ -269,7 +259,6 @@ h1, h2, .next strong { overflow-wrap: break-word; }
   .site-footer { flex-direction: column; align-items: flex-start; gap: 0.8rem; padding: 1.5rem 1rem calc(2rem + env(safe-area-inset-bottom)); }
   .site-footer .links { flex-wrap: wrap; gap: 0.4rem 1.5rem; }
   .site-footer .links a, .site-footer .links button { padding: 0.45rem 0; }
-  .curtain span { font-size: clamp(2.2rem, 14vw, 5rem); }
 }
 @media (max-width: 380px) {
   .nav { font-size: 1.35rem; }
@@ -299,11 +288,11 @@ h1, h2, .next strong { overflow-wrap: break-word; }
 }
 
 /* ---------- theme swipe (View Transitions) ---------- */
-html.theme-swap, html.theme-swap * { transition: none !important; }
-html.theme-swap::view-transition-old(root),
-html.theme-swap::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-html.theme-swap::view-transition-old(root) { z-index: 1; }
-html.theme-swap::view-transition-new(root) { z-index: 2; animation: theme-wipe 0.85s cubic-bezier(0.7, 0, 0.2, 1) both; }
+html.vt-wipe, html.vt-wipe * { transition: none !important; }
+html.vt-wipe::view-transition-old(root),
+html.vt-wipe::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.vt-wipe::view-transition-old(root) { z-index: 1; }
+html.vt-wipe::view-transition-new(root) { z-index: 2; animation: theme-wipe 0.85s cubic-bezier(0.7, 0, 0.2, 1) both; }
 @keyframes theme-wipe {
   from { clip-path: inset(0 100% 0 0); }
   to { clip-path: inset(0 0 0 0); }
@@ -324,7 +313,6 @@ body.has-cursor, body.has-cursor * { cursor: none !important; }
 @media (hover: none), (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } }
 
 /* ---------- page change: the page zooms out and swipes away, the next one swipes in ---------- */
-@view-transition { navigation: auto; }
 ::view-transition { background: var(--bg); }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.95s; animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1); animation-fill-mode: both; mix-blend-mode: normal; }
 ::view-transition-old(root) { animation-name: page-out; z-index: 1; }
@@ -362,4 +350,18 @@ body.has-cursor, body.has-cursor * { cursor: none !important; }
   .nav a:hover::after { box-shadow: 0 0 10px var(--accent); }
   .logo:hover { text-shadow: 0 0 16px var(--glow-a); }
   .next:hover strong, .contact-links a:hover { text-shadow: 0 0 22px var(--glow-a), 0 0 60px var(--glow-b); }
+}
+
+/* going back: the page zooms out and swipes right, the previous one comes from the left */
+html.vt-back::view-transition-old(root) { animation-name: page-out-back; }
+html.vt-back::view-transition-new(root) { animation-name: page-in-back; }
+@keyframes page-out-back {
+  0% { transform: none; border-radius: 0; }
+  38% { transform: scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
+  100% { transform: translateX(118%) scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
+}
+@keyframes page-in-back {
+  0% { transform: translateX(-118%) scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
+  62% { transform: scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
+  100% { transform: none; border-radius: 0; }
 }

@@ -145,7 +145,7 @@
   ]
 };
   var root = document.documentElement;
-  var page = root.getAttribute("data-page") || "index";
+  function curPage() { return root.getAttribute("data-page") || "index"; }
 
   // Saved choice first; otherwise Russian for Russian/Kazakh browsers, English for the rest
   var lang = "";
@@ -173,8 +173,8 @@
       el.innerHTML = lang === "ru" && RU[k] !== undefined ? RU[k] : el.dataset.en;
     });
     root.setAttribute("lang", lang);
-    document.title = lang === "ru" && RU["title." + page] ? RU["title." + page] : enTitle;
-    if (md) md.setAttribute("content", lang === "ru" && RU["desc." + page] ? RU["desc." + page] : enDesc);
+    document.title = lang === "ru" && RU["title." + curPage()] ? RU["title." + curPage()] : enTitle;
+    if (md) md.setAttribute("content", lang === "ru" && RU["desc." + curPage()] ? RU["desc." + curPage()] : enDesc);
     document.querySelectorAll(".lang-btn").forEach(function (b) {
       b.setAttribute("aria-label", t("aria.lang"));
       [].forEach.call(b.querySelectorAll("[data-l]"), function (s) {
@@ -194,6 +194,14 @@
     document.dispatchEvent(new Event("langchange"));
   }
 
-  window.I18N = { get lang() { return lang; }, t: t, set: set, apply: apply };
+  // Called after a page change: pick up the new page's elements and its English title/description
+  function refresh(info) {
+    if (info) { enTitle = info.title; enDesc = info.desc; }
+    nodes = [].slice.call(document.querySelectorAll("[data-i18n]"));
+    nodes.forEach(function (el) { if (el.dataset.en === undefined) el.dataset.en = el.innerHTML; });
+    apply();
+  }
+
+  window.I18N = { get lang() { return lang; }, t: t, set: set, apply: apply, refresh: refresh };
   apply();
 })();
