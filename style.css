@@ -325,18 +325,18 @@ body.has-cursor, body.has-cursor * { cursor: none !important; }
 
 /* ---------- page change: the page zooms out and swipes away, the next one swipes in ---------- */
 @view-transition { navigation: auto; }
-::view-transition { background: var(--accent); }
+::view-transition { background: var(--bg); }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.95s; animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1); animation-fill-mode: both; mix-blend-mode: normal; }
 ::view-transition-old(root) { animation-name: page-out; z-index: 1; }
 ::view-transition-new(root) { animation-name: page-in; z-index: 2; }
 @keyframes page-out {
   0% { transform: none; border-radius: 0; }
-  38% { transform: scale(0.84); border-radius: 32px; }
-  100% { transform: translateX(-118%) scale(0.84); border-radius: 32px; }
+  38% { transform: scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
+  100% { transform: translateX(-118%) scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
 }
 @keyframes page-in {
-  0% { transform: translateX(118%) scale(0.84); border-radius: 32px; }
-  62% { transform: scale(0.84); border-radius: 32px; }
+  0% { transform: translateX(118%) scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
+  62% { transform: scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
   100% { transform: none; border-radius: 0; }
 }
 @media (prefers-reduced-motion: reduce) {

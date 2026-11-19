@@ -124,44 +124,12 @@
     setTimeout(function () { curtain.classList.remove("reveal-out"); }, 900);
   }
 
-  // Browsers with cross-document view transitions (Chrome, Edge, Safari 18.2+) animate page
-  // changes in CSS: the old page shrinks and swipes away, the new one swipes in.
-  // Others get the plain curtain below.
-  var xdoc = "PageSwapEvent" in window || "PageRevealEvent" in window;
+  // Page changes are animated by the browser in CSS (cross-document view transitions, see
+  // style.css): the old page zooms out and swipes left, the next one swipes in.
+  // Browsers without support just open the next page.
   window.addEventListener("pageswap", function (e) {
     // "Pause animations" also stops the page transition
     if (e.viewTransition && root.classList.contains("paused")) e.viewTransition.skipTransition();
-  });
-
-  var incoming = null;
-  try { incoming = sessionStorage.getItem("t"); } catch (e) {}
-  if (incoming && !reduce) {
-    try { sessionStorage.removeItem("t"); sessionStorage.setItem("seen", "1"); } catch (e) {}
-    clabel.textContent = "";
-    curtain.classList.add("start-covered");
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        curtain.classList.remove("start-covered");
-        curtain.classList.add("reveal-out");
-        setTimeout(function () { curtain.classList.remove("reveal-out"); }, 900);
-      });
-    });
-  }
-
-  document.addEventListener("click", function (e) {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    var a = e.target.closest ? e.target.closest("a[href]") : null;
-    if (!a || (a.target && a.target !== "_self")) return;
-    var url = new URL(a.href, location.href);
-    if (url.protocol !== location.protocol || url.host !== location.host) return;
-    if (url.pathname === location.pathname) return;
-    if (reduce || root.classList.contains("paused")) return;
-    if (xdoc) return; // the browser animates this navigation itself (see style.css)
-    e.preventDefault();
-    clabel.textContent = "";
-    curtain.classList.add("cover");
-    try { sessionStorage.setItem("t", "1"); } catch (err) {}
-    setTimeout(function () { location.href = url.href; }, 650);
   });
 
   // Language switch: the curtain covers the page, the text changes underneath, then it lifts
