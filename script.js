@@ -124,11 +124,20 @@
     setTimeout(function () { curtain.classList.remove("reveal-out"); }, 900);
   }
 
+  // Browsers with cross-document view transitions (Chrome, Edge, Safari 18.2+) animate page
+  // changes in CSS: the old page shrinks and swipes away, the new one swipes in.
+  // Others get the plain curtain below.
+  var xdoc = "PageSwapEvent" in window || "PageRevealEvent" in window;
+  window.addEventListener("pageswap", function (e) {
+    // "Pause animations" also stops the page transition
+    if (e.viewTransition && root.classList.contains("paused")) e.viewTransition.skipTransition();
+  });
+
   var incoming = null;
   try { incoming = sessionStorage.getItem("t"); } catch (e) {}
   if (incoming && !reduce) {
     try { sessionStorage.removeItem("t"); sessionStorage.setItem("seen", "1"); } catch (e) {}
-    clabel.textContent = incoming;
+    clabel.textContent = "";
     curtain.classList.add("start-covered");
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
@@ -147,12 +156,11 @@
     if (url.protocol !== location.protocol || url.host !== location.host) return;
     if (url.pathname === location.pathname) return;
     if (reduce || root.classList.contains("paused")) return;
+    if (xdoc) return; // the browser animates this navigation itself (see style.css)
     e.preventDefault();
-    var file = url.pathname.split("/").pop() || "index.html";
-    var name = tr(pageKeys[file], pageFallback[file] || "");
-    clabel.textContent = name;
+    clabel.textContent = "";
     curtain.classList.add("cover");
-    try { sessionStorage.setItem("t", name); } catch (err) {}
+    try { sessionStorage.setItem("t", "1"); } catch (err) {}
     setTimeout(function () { location.href = url.href; }, 650);
   });
 
@@ -271,5 +279,7 @@
     }
   } else {
     ready();
+    // the intro counter is for the first page of a visit only
+    try { sessionStorage.setItem("seen", "1"); } catch (e) {}
   }
 })();
