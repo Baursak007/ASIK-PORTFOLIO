@@ -297,3 +297,28 @@ h1, h2, .next strong { overflow-wrap: break-word; }
   .nav { visibility: hidden; transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1), visibility 0s 0.5s; }
   .nav.open { visibility: visible; transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1), visibility 0s 0s; }
 }
+
+/* ---------- theme swipe (View Transitions) ---------- */
+html.theme-swap, html.theme-swap * { transition: none !important; }
+html.theme-swap::view-transition-old(root),
+html.theme-swap::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.theme-swap::view-transition-old(root) { z-index: 1; }
+html.theme-swap::view-transition-new(root) { z-index: 2; animation: theme-wipe 0.85s cubic-bezier(0.7, 0, 0.2, 1) both; }
+@keyframes theme-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* ---------- cursor follower (mouse only) ---------- */
+.cursor-dot, .cursor-ring { position: fixed; left: 0; top: 0; z-index: 300; pointer-events: none; opacity: 0; mix-blend-mode: difference; will-change: transform; }
+.cursor-dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #fff; transition: opacity 0.25s, width 0.25s, height 0.25s, margin 0.25s; }
+.cursor-ring { width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; border: 1.5px solid #fff; background: transparent; transition: opacity 0.25s, width 0.3s cubic-bezier(0.2, 0.7, 0.1, 1), height 0.3s cubic-bezier(0.2, 0.7, 0.1, 1), margin 0.3s cubic-bezier(0.2, 0.7, 0.1, 1), background 0.3s; }
+body.cursor-on .cursor-dot, body.cursor-on .cursor-ring { opacity: 1; }
+body.cursor-hover .cursor-ring { width: 72px; height: 72px; margin: -36px 0 0 -36px; background: #fff; }
+body.cursor-hover .cursor-dot { opacity: 0; }
+body.cursor-down .cursor-ring { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+body.cursor-down.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
+/* hide the system cursor only when our follower is running */
+body.has-cursor, body.has-cursor * { cursor: none !important; }
+.paused .cursor-ring, .paused .cursor-dot { transition: none; }
+@media (hover: none), (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } }

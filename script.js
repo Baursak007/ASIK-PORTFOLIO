@@ -10,11 +10,29 @@
 
   // Theme toggle (remembered in the browser)
   var tb = document.querySelector(".theme-btn");
+  var swapping = false;
   if (tb) {
     tb.addEventListener("click", function () {
+      if (swapping) return;
       var next = root.dataset.theme === "dark" ? "light" : "dark";
-      root.dataset.theme = next;
-      try { localStorage.setItem("theme", next); } catch (e) {}
+      function apply() {
+        root.dataset.theme = next;
+        try { localStorage.setItem("theme", next); } catch (e) {}
+      }
+      // The new theme swipes in over the old one (View Transitions API).
+      // Browsers without it, or reduced motion / paused animations, switch instantly.
+      if (!document.startViewTransition || reduce || root.classList.contains("paused")) {
+        apply();
+        return;
+      }
+      swapping = true;
+      root.classList.add("theme-swap");
+      var vt = document.startViewTransition(apply);
+      vt.finished.then(done, done);
+      function done() {
+        root.classList.remove("theme-swap");
+        swapping = false;
+      }
     });
   }
 
@@ -162,6 +180,67 @@
   window.addEventListener("pageshow", function (e) {
     if (e.persisted) curtain.classList.remove("cover");
   });
+
+  // Cursor follower (mouse only): a dot that sticks to the pointer and a ring that trails it.
+  // The ring grows when the pointer is over a link or button.
+  var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (fine && !reduce) {
+    var dot = document.createElement("div");
+    var ring = document.createElement("div");
+    dot.className = "cursor-dot";
+    ring.className = "cursor-ring";
+    dot.setAttribute("aria-hidden", "true");
+    ring.setAttribute("aria-hidden", "true");
+    document.body.appendChild(ring);
+    document.body.appendChild(dot);
+    document.body.classList.add("has-cursor");
+
+    var mx = -100, my = -100, rx = -100, ry = -100, running = false, seen = false;
+
+    function frame() {
+      var k = root.classList.contains("paused") ? 1 : 0.18;
+      rx += (mx - rx) * k;
+      ry += (my - ry) * k;
+      ring.style.transform = "translate3d(" + rx + "px," + ry + "px,0)";
+      if (Math.abs(mx - rx) > 0.1 || Math.abs(my - ry) > 0.1) {
+        requestAnimationFrame(frame);
+      } else {
+        running = false;
+      }
+    }
+
+    document.addEventListener("mousemove", function (e) {
+      mx = e.clientX;
+      my = e.clientY;
+      dot.style.transform = "translate3d(" + mx + "px," + my + "px,0)";
+      if (!seen) {
+        seen = true;
+        rx = mx;
+        ry = my;
+        document.body.classList.add("cursor-on");
+      }
+      if (!running) {
+        running = true;
+        requestAnimationFrame(frame);
+      }
+    }, { passive: true });
+
+    document.addEventListener("mouseleave", function () { document.body.classList.remove("cursor-on"); seen = false; });
+    document.addEventListener("mouseenter", function () { document.body.classList.add("cursor-on"); });
+
+    var HOVER = "a, button, [role='button'], summary";
+    document.addEventListener("mouseover", function (e) {
+      if (e.target.closest && e.target.closest(HOVER)) document.body.classList.add("cursor-hover");
+    });
+    document.addEventListener("mouseout", function (e) {
+      if (!e.target.closest || !e.target.closest(HOVER)) return;
+      var to = e.relatedTarget;
+      if (to && to.closest && to.closest(HOVER)) return;
+      document.body.classList.remove("cursor-hover");
+    });
+    document.addEventListener("mousedown", function () { document.body.classList.add("cursor-down"); });
+    document.addEventListener("mouseup", function () { document.body.classList.remove("cursor-down"); });
+  }
 
   // Loader (home page only, once per session)
   var ld = document.getElementById("loader");
