@@ -6,6 +6,8 @@ Static portfolio site (HTML, CSS, JS). No build step, no dependencies.
 
 - `index.html`, `work.html`, `about.html`, `notes.html`, `play.html`, `contact.html`
 - `style.css`, `script.js`, `i18n.js`, `play.js` (the demo bot on the Play page)
+- `favicon.svg`, `404.html`, `robots.txt`, `sitemap.xml`
+- `tests/` — automated checks (see Tests below)
 
 ## Before publishing
 
@@ -25,3 +27,21 @@ The site has English and Russian. English text is written in the HTML; Russian l
 
 - Colors and fonts: variables at the top of `style.css` (`--accent` is the highlight color).
 - Light/dark theme: toggle in the header, remembered in the browser.
+
+## Tests
+
+The site itself needs no tools, only the tests do.
+
+```
+npm run test:static    # no dependencies: links, translations, no periods in texts, secrets scan, contrast
+npm run test:browser   # needs the playwright package and Chromium: navigation, language, theme, mobile menu, bot
+npm test               # both
+```
+
+Add a new page: put it in `PAGES` at the top of both test files, add its `title.<page>` / `desc.<page>` Russian strings in `i18n.js`, and add it to `sitemap.xml`.
+
+## Security notes
+
+- Never put bot tokens, API keys or passwords in this repository, it is public. Keep them in environment variables or GitHub Secrets.
+- Turn on two-factor authentication for the GitHub account: it is the one way to take over this site.
+- Settings → Pages → keep "Enforce HTTPS" on.

@@ -4,7 +4,7 @@
   var BACK = { en: "Back to menu", ru: "Назад в меню" };
   var tree = {
     start: {
-      text: { en: "Hi! I'm Asik's demo bot. What would you like to know?", ru: "Привет! Я демо-бот Asik. Что вас интересует?" },
+      text: { en: "Hi! I'm Asik's demo bot — what would you like to know?", ru: "Привет! Я демо-бот Asik — что вас интересует?" },
       options: [
         { label: { en: "Show the Arqa project", ru: "Показать проект Arqa" }, next: "arqa" },
         { label: { en: "How much does a site or bot cost?", ru: "Сколько стоит сайт или бот?" }, next: "price" },
@@ -12,14 +12,14 @@
       ]
     },
     arqa: {
-      text: { en: "Arqa is a barbershop landing page with online booking. You can open the live site.", ru: "Arqa — лендинг для барбершопа с онлайн-записью. Можно открыть работающий сайт." },
+      text: { en: "Arqa is a barbershop landing page with online booking — you can open the live site", ru: "Arqa — лендинг для барбершопа с онлайн-записью — можно открыть работающий сайт" },
       options: [
         { label: { en: "Open the Arqa site", ru: "Открыть сайт Arqa" }, href: "https://baursak007.github.io/Arqa-barbershop/" },
         { label: BACK, next: "start" }
       ]
     },
     price: {
-      text: { en: "Prices:\n• Landing pages: from $150\n• Chatbots: from $100\n• Site + bot + CRM: from $400\n\nThe exact price depends on the task.", ru: "Цены:\n• Лендинги — от $150\n• Чат-боты — от $100\n• Сайт + бот + CRM — от $400\n\nТочная цена зависит от задачи." },
+      text: { en: "Prices:\n• Landing pages: from $150\n• Chatbots: from $100\n• Site + bot + CRM: from $400\n\nThe exact price depends on the task", ru: "Цены:\n• Лендинги — от $150\n• Чат-боты — от $100\n• Сайт + бот + CRM — от $400\n\nТочная цена зависит от задачи" },
       options: [
         { label: { en: "Message on Telegram", ru: "Написать в Telegram" }, href: "https://t.me/Auramonster" },
         { label: BACK, next: "start" }

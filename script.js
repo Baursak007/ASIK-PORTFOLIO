@@ -124,10 +124,10 @@
   // ---------- page changes: the page zooms out and swipes left, the next one swipes in ----------
   // Pages are fetched and the <main> block is swapped inside a view transition.
   // If anything is unsupported (or animations are paused) links just work as normal links.
-  var cache = {};
-  var curPath = location.pathname;
-
   function pageFile(u) { return u.pathname.split("/").pop() || "index.html"; }
+  var cache = {};
+  var curFile = pageFile(location);
+
   function isPage(u) { return /\.html$|\/$/.test(u.pathname); }
 
   function prefetch(href) {
@@ -188,7 +188,7 @@
       root.classList.toggle("vt-back", !!back);
       var vt = document.startViewTransition(function () {
         if (push) history.pushState(null, "", url.href);
-        curPath = url.pathname;
+        curFile = pageFile(url);
         swapPage(doc, url);
       });
       return vt.finished;
@@ -197,12 +197,14 @@
     }).then(function () {
       root.classList.remove("vt-back");
       busy = false;
+      // back / forward was pressed while the swipe was still running: catch up now
+      if (pageFile(location) !== curFile) go(new URL(location.href), false, true);
     });
   }
 
   function internal(a) {
     var url = new URL(a.href, location.href);
-    if (url.origin !== location.origin || !isPage(url) || url.pathname === location.pathname) return null;
+    if (url.origin !== location.origin || !isPage(url) || pageFile(url) === pageFile(location)) return null;
     return url;
   }
 
@@ -228,7 +230,7 @@
 
   // back / forward buttons
   window.addEventListener("popstate", function () {
-    if (location.pathname === curPath) return; // only the #hash changed
+    if (pageFile(location) === curFile) return; // only the #hash changed
     var url = new URL(location.href);
     if (!canAnimate()) { location.reload(); return; }
     go(url, false, true);

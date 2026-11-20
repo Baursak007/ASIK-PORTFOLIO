@@ -1,0 +1,10 @@
+{
+  "name": "asik-portfolio",
+  "private": true,
+  "description": "Static portfolio site with its tests",
+  "scripts": {
+    "test": "node --test tests/static.test.cjs tests/browser.test.cjs",
+    "test:static": "node --test tests/static.test.cjs",
+    "test:browser": "node --test tests/browser.test.cjs"
+  }
+}

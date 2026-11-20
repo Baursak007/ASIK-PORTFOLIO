@@ -13,7 +13,7 @@
 :root[data-theme="light"] {
   --bg: #f3f1ea;
   --fg: #111110;
-  --muted: #6a6a64;
+  --muted: #5e5e58;
   --line: rgba(0, 0, 0, 0.14);
   --card: #eae7de;
   --accent: #2f4bff;
@@ -364,4 +364,22 @@ html.vt-back::view-transition-new(root) { animation-name: page-in-back; }
   0% { transform: translateX(-118%) scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
   62% { transform: scale(0.84); border-radius: 32px; box-shadow: 0 0 0 1px var(--line); }
   100% { transform: none; border-radius: 0; }
+}
+
+/* ---------- touch targets (at least ~44px on phones) ---------- */
+@media (max-width: 760px) {
+  .logo { display: inline-flex; align-items: center; min-height: 2.75rem; min-width: 2.75rem; }
+  .menu-btn { min-width: 3.25rem; }
+  .site-footer .links a, .site-footer .links button { padding: 0.8rem 0; min-height: 2.75rem; display: inline-flex; align-items: center; }
+  .phone-top button { min-height: 2.75rem; padding: 0 0.4rem; }
+}
+@media (hover: none), (pointer: coarse) {
+  .phone-top button { min-height: 2.75rem; padding: 0 0.4rem; }
+}
+
+/* ---------- no JavaScript: show the menu as a plain row of links ---------- */
+html:not(.js) .menu-btn { display: none; }
+@media (max-width: 760px) {
+  html:not(.js) .site-header { flex-wrap: wrap; }
+  html:not(.js) .nav { position: static; visibility: visible; transform: none; inset: auto; flex-direction: row; flex-wrap: wrap; gap: 0.2rem 1.2rem; padding: 0; font-size: 0.95rem; width: 100%; order: 5; background: none; }
 }
