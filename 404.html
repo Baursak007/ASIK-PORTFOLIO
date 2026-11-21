@@ -3,14 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Page not found — Asik</title>
+  <title>Page not found | Asik</title>
+  <meta name="description" content="This page does not exist, the home page of Asik's portfolio is one click away">
   <meta name="robots" content="noindex">
   <style>
-    :root { color-scheme: dark light; }
-    body { margin: 0; min-height: 100vh; display: grid; place-content: center; gap: 1rem; padding: 1rem; font-family: system-ui, sans-serif; background: #0b0b0c; color: #f2f0ea; text-align: center; }
-    h1 { font-size: clamp(4rem, 20vw, 9rem); margin: 0; letter-spacing: -0.04em; }
-    p { margin: 0; color: #8d8d86; }
-    a { display: inline-block; margin-top: 1rem; padding: 0.9rem 1.6rem; border-radius: 999px; background: #c6ff3d; color: #0b0b0c; font-weight: 700; text-decoration: none; }
+    /* Hallmark · checked: 2026-11-21 · genre: editorial (inferred)
+     * floor: 0 FAIL · fixed: 6 (tokens, focus ring, overflow clip, svh, balanced head, no inline colour) · structural: 0 printed
+     * built: the project · redesign: polish · v2.0.0 */
+    :root { color-scheme: dark light; --bg: #0b0b0c; --fg: #f2f0ea; --muted: #8d8d86; --accent: #c6ff3d; --accent-ink: #0b0b0c; --font: system-ui, sans-serif; }
+    html, body { overflow-x: clip; }
+    body { margin: 0; min-height: 100vh; min-height: 100svh; display: grid; place-content: center; gap: 1rem; padding: 1rem; font-family: var(--font); background: var(--bg); color: var(--fg); text-align: center; }
+    h1 { font-size: clamp(4rem, 20vw, 9rem); line-height: 1; margin: 0; letter-spacing: -0.04em; text-wrap: balance; }
+    p { margin: 0; color: var(--muted); }
+    a { display: inline-block; margin-top: 1rem; padding: 0.9rem 1.6rem; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; text-decoration: none; }
+    a:active { transform: translateY(1px); }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   </style>
 </head>
 <body>

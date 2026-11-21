@@ -95,16 +95,6 @@
   tick();
   setInterval(tick, 30000);
 
-  // Scroll counter 000 / 100
-  var sn = document.getElementById("scroll-n");
-  function onScroll() {
-    var h = document.documentElement.scrollHeight - window.innerHeight;
-    var p = h > 0 ? Math.round((window.scrollY / h) * 100) : 0;
-    if (sn) sn.textContent = String(p).padStart(3, "0");
-  }
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-
   // Reveal on scroll (also used again after a page change)
   var io = null;
   if ("IntersectionObserver" in window) {
@@ -165,7 +155,6 @@
     document.body.classList.remove("cursor-hover", "cursor-down");
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     observeReveals();
-    onScroll();
 
     // the demo bot on the Play page has its own script
     if (document.getElementById("chat")) {
